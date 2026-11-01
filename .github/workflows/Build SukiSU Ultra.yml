@@ -659,6 +659,11 @@ jobs:
           echo "🏗️ 开始内核编译..."
           export KBUILD_BUILD_USER="xiaoxiaow"
           export KBUILD_BUILD_HOST="xiaoxiaow_build"
+          # 26.04 runner 自带 clang >= 20，strchr/strrchr 等内建函数会保留 const 返回值，
+          # 6.1 厂商树的 tools/lib/bpf 未适配，且 tools/lib/bpf/Makefile 硬编码 -Werror，
+          # 导致 resolve_btfids 编译失败；此处仅放宽宿主机工具的指针限定告警
+          export HOSTCFLAGS="${HOSTCFLAGS:-} -O2 -g -Wno-incompatible-pointer-types-discards-qualifiers -Wno-incompatible-pointer-types"
+          echo "🔍 默认 clang: $(clang --version 2>/dev/null | head -1)"
 
           if [ "${{ github.event.inputs.KERNEL_VERSION }}" == "6.1" ]; then
             export KBUILD_BUILD_TIMESTAMP="Tue Mar 10 03:53:33 UTC 2026"
