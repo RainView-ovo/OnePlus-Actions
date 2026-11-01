@@ -65,7 +65,7 @@ sudo apt-get update
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends \
   python3 git curl ccache libelf-dev \
   build-essential flex bison libssl-dev \
-  libncurses-dev liblz4-tool zlib1g-dev \
+  libncurses-dev lz4 zlib1g-dev \
   libxml2-utils rsync unzip python3-pip gawk dos2unix
 clear
 echo "✅ 必要构建依赖安装完成"

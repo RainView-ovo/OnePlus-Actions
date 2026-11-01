@@ -63,7 +63,7 @@ sudo apt-get update
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends \
   python3 git curl ccache libelf-dev \
   build-essential flex bison libssl-dev \
-  libncurses-dev liblz4-tool zlib1g-dev \
+  libncurses-dev lz4 zlib1g-dev \
   libxml2-utils rsync unzip python3-pip gawk dos2unix
 clear
 echo "✅ 必要构建依赖安装完成"
@@ -166,6 +166,7 @@ git clone https://github.com/ShirkNeko/SukiSU_patch.git
 
 cd kernel_platform
 echo "📝 正在复制补丁文件..."
+if [ "$SUSFS" == "On" ]; then
   cp ../susfs4ksu/kernel_patches/50_add_susfs_in_gki-${ANDROID_VERSION}-${KERNEL_VERSION}.patch ./common/
   cp ../susfs4ksu/kernel_patches/fs/* ./common/fs/
   cp ../susfs4ksu/kernel_patches/include/linux/* ./common/include/linux/

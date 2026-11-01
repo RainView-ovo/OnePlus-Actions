@@ -190,8 +190,29 @@ jobs:
       - name: "📦 Cache & Install Dependencies | 缓存 & 安装构建依赖"
         uses: awalsh128/cache-apt-pkgs-action@latest 
         with: 
-          packages: python3 git curl ccache libelf-dev build-essential flex bison libssl-dev libncurses-dev liblz4-tool zlib1g-dev libxml2-utils rsync unzip gawk dos2unix
+          packages: python3 git curl ccache libelf-dev build-essential flex bison libssl-dev libncurses-dev lz4 zlib1g-dev libxml2-utils rsync unzip gawk dos2unix
           execute_install_scripts: true
+
+      - name: "🧩 Verify Dependencies | 校验构建依赖"
+        run: |
+          PACKAGES="python3 git curl ccache libelf-dev build-essential flex bison libssl-dev libncurses-dev lz4 zlib1g-dev libxml2-utils rsync unzip gawk dos2unix"
+          BINARIES="python3 git curl ccache gcc flex bison rsync unzip gawk dos2unix lz4"
+
+          missing=""
+          for bin in $BINARIES; do
+            command -v "$bin" >/dev/null 2>&1 || missing="$missing $bin"
+          done
+
+          if [ -n "$missing" ]; then
+            echo "⚠️ 依赖缺失:${missing}，改用 apt 直接安装..."
+            sudo apt-get update
+            sudo DEBIAN_FRONTEND=noninteractive apt-get install -y $PACKAGES
+          fi
+
+          for bin in $BINARIES; do
+            command -v "$bin" >/dev/null 2>&1 || { echo "❌ 依赖 $bin 不可用"; exit 1; }
+          done
+          echo "✅ 构建依赖已就绪"
          
       - name: "💾 Restore ccache (With SUSFS) | 恢复ccache缓存 (With SUSFS)"
         if: ${{ github.event.inputs.SUSFS == 'On' }}
@@ -228,7 +249,8 @@ jobs:
               echo "ℹ️ ccache已存在，跳过初始化"
             fi
           else
-            echo "⚠️ 未找到ccache命令，跳过初始化"
+            echo "❌ 未找到 ccache 命令，终止构建（CC=\"ccache clang\" 依赖 ccache）"
+            exit 1
           fi
           # 显示缓存统计
           ccache -s
